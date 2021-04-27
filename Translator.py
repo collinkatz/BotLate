@@ -5,11 +5,21 @@ from google.cloud import translate_v2 as translate
 class Translator:
     def __init__(self):
         """
-        Initialize the translator object. Make sure key is valid.
+        Initialize the translator object. Load in the accepted languages. Make sure key is valid.
         :param key: the Google Project API Key
         """
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = 'botlate-b3e46cfde885.json'
         self.detected_lang = "" #stores the detected language
+
+        #Create a dictionary of language_code -> name
+        self.lang_dict = {} #code -> name
+        self.lang_dict_rev = {} #name -> code
+        translate_client = translate.Client()
+        all_langs = translate_client.get_languages()
+        for pair in all_langs:
+            self.lang_dict[pair["language"]] = pair["name"]
+            self.lang_dict_rev[pair["name"]] = pair["language"]
+
 
     def translate(self, origin_lang, text):
         """
@@ -34,6 +44,12 @@ class Translator:
 
         self.detected_lang = result["detectedSourceLanguage"]
         return result["translatedText"]
+
+    def name_to_code(self, name):
+        #TODO: Add ability to find closest match
+        for n in self.lang_dict_rev.keys():
+            if n == name or (name in n):
+                return self.lang_dict_rev[n]
 
 
 
