@@ -21,9 +21,9 @@ class Translator:
             self.lang_dict_rev[pair["name"]] = pair["language"]
 
 
-    def translate(self, origin_lang, text):
+    def translate(self, target_lang, text):
         """
-        Translates the text to English
+        Translates the text to the target language
         :param origin_lang: the orign language (from detect_language)
         :param text: text to translate
         :return: the text in English
@@ -36,7 +36,7 @@ class Translator:
 
         # Text can also be a sequence of strings, in which case this method
         # will return a sequence of results for each text.
-        result = translate_client.translate(text, target_language=origin_lang)
+        result = translate_client.translate(text, target_language=target_lang)
 
         #print(u"Text: {}".format(result["input"]))
         #print(u"Translation: {}".format(result["translatedText"]))
