@@ -7,4 +7,4 @@ Run these commands inside the Python VM:
 pip install google-cloud-translate==2.0.1
 pip install --upgrade google-cloud-texttospeech
 pip install --upgrade google-cloud-storage
-
+pip install discord.py
