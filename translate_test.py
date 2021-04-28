@@ -3,8 +3,9 @@ from Translator import Translator
 if __name__ == '__main__':
     trans = Translator()
 
-    print(trans.translate("ja", "es hora de comer"))
+    text = trans.translate("es", "it is time to eat")
     print(trans.detected_lang)
+    print(trans.name_to_code("Spanish"))
 
-    print(trans.lang_dict)
-    print(trans.name_to_code("Japanese"))
+    print(text)
+    trans.speak("es-ES", text, "female")
