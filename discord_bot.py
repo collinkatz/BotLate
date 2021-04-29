@@ -1,5 +1,6 @@
 import discord
 from Translator import Translator
+from Content import Content
 
 
 client = discord.Client()
@@ -8,6 +9,16 @@ client = discord.Client()
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
+
+def list_quizes():
+    """Returns a string of available quizzes"""
+    s = ""
+    s += "Usage: -bl quiz 1 OR -bl quiz occupations\n"
+    s += "1) Occupations\n"
+    # Write this with real code
+    return s
+
+
 
 
 @client.event
@@ -27,6 +38,13 @@ async def on_message(message):
         voice_client.stop()
         encoded_audio = discord.FFmpegOpusAudio("./audio_data/output.mp3")
         voice_client.play(encoded_audio)
+
+    if message.content.startswith('-bl list_quizzes'):
+        try:
+            channel = message.author.voice.channel
+            voice_channel = await channel.connect()
+        except discord.errors.ClientException:
+            await message.channel.send(list_quizes())
 
     if message.content.startswith('-bl leave'):
         voice_client = client.voice_clients[0]
