@@ -94,7 +94,7 @@ class Translator:
 
         #TODO: see if this binary data can be directly passed to discord bot
         #for now, write a .mp3 file
-        with open("audio_data/output.mp3", "wb") as out:
+        with open("audio_data/output.mp3", "wb", 0) as out:
             out.write(response.audio_content)
 
 
