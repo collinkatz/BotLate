@@ -105,7 +105,7 @@ async def on_message(message):
 
         if command == 'translate':
             native_text = args[3]
-
+            print("hi")
             print(native_text)
             print(supported_langs[lang][0:2])
             text = trans.translate(supported_langs[lang][0:2], native_text)
