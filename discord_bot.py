@@ -5,14 +5,17 @@ import time
 import os
 import time
 
-trans = Translator()
-supported_langs = trans.speech_langs
+translator = Translator()
+supported_langs = translator.speech_langs
 client = discord.Client()
 README = "TODO\n"
 
 COMMAND_PREFIX = '-bl'
 CONFIG = {"lang": "Spanish", "voice_mode": "female"}
 KEYWORDS = [COMMAND_PREFIX, 'join', 'leave', 'play', 'translate']
+
+cont = Content(translator, CONFIG["lang"])
+cont.load_quizzes()
 
 
 def is_key_word(word):
@@ -145,11 +148,6 @@ async def on_message(message):
         """
         command = message.content.lstrip("-bl quiz")
         command = command.strip(' ')
-
-        translator = Translator()
-
-        cont = Content(translator)
-        cont.load_quizzes()
 
         quiz_dict = {}
         quiz_dict["occupations"] = 1
