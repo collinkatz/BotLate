@@ -69,10 +69,12 @@ async def on_message(message):
 
         if command == '':
             await message.channel.send(README)
+            #TODO: exit method here
 
         else:
             if message.lower() not in quiz_dict.keys():
                 await message.channel.send("Invalid quiz name\n")
+                #TODO: exit method here
             else:
                 id = quiz_dict[command]
             quiz = cont.get_quiz(id)
