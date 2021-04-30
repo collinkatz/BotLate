@@ -5,10 +5,49 @@ import time
 
 trans = Translator()
 supported_langs = trans.speech_langs
-print(supported_langs.keys(), supported_langs.values())
 client = discord.Client()
 
 COMMAND_PREFIX = '-bl'
+CONFIG = {"lang": "Spanish", "voice_mode": "female"}
+KEYWORDS = [COMMAND_PREFIX, 'join', 'leave', 'play', 'translate']
+
+
+def is_key_word(word):
+    for key_word in KEYWORDS:
+        if word == key_word:
+            return True
+    return False
+
+
+def parse_key_words(args):
+    arglist, left_overs = parse_key_words_r(args, [])
+    print(arglist, left_overs)
+    return arglist, left_overs
+
+
+def parse_key_words_r(args, arglist):
+    print(args)
+    word = args[0]
+    if is_key_word(word):
+        arglist.append(word)
+        args.pop(0)
+        return parse_key_words_r(args, arglist)
+    else:
+        return arglist, args
+
+
+def parse_command_args(message):
+    """
+    This function separates out the command, arguments, and data from a user entered command
+    :param message: The command message the user entered
+    :return: command, A string: the command specified by the user, arg_list, A list of strings representing the arguments passed by the user, data, A string: the data after the arguments passed by the user
+    """
+    args = str(message.content).split(" ")
+    args.pop(0) # removes command prefix
+    arg_list, data = parse_key_words(args)
+    data = ' '.join(data) # create data/sentence from leftover stuff in args
+    command = arg_list.pop(0) # first arg in arglist is always command
+    return command, arg_list, data
 
 
 @client.event
@@ -47,45 +86,37 @@ async def on_message(message):
         return
 
     if message.content.startswith(COMMAND_PREFIX): # If a user has entered a command
-        try:
-            args = str(message.content).split(" ", 3)
-            command = args[1]
-        except IndexError:
-            message.channel.send("Please specify a command")
-        finally:
-            if command == "join":
-                await connect_vc(message)
+        command, args, data = parse_command_args(message)
+        print("command: ", command, "args: ", args, "data: ", data)
 
-            if command == 'leave':
-                voice_client = client.voice_clients[0]
-                await disconnect_vc(voice_client)
+        if command == "join":
+            await connect_vc(message)
 
-            if command == 'play':
-                voice_client = client.voice_clients[0]
-                encoded_audio = discord.FFmpegOpusAudio("./audio_data/output.mp3")
-                voice_client.play(encoded_audio)
+        if command == 'leave':
+            voice_client = client.voice_clients[0]
+            await disconnect_vc(voice_client)
 
-            # Translation commands below
+        if command == 'play':
+            voice_client = client.voice_clients[0]
+            encoded_audio = discord.FFmpegOpusAudio("./audio_data/output.mp3")
+            voice_client.play(encoded_audio)
 
-            if command == 'translate':
-                try:
-                    lang = args[2]
-                except IndexError:
-                    message.channel.send("Cannot translate: No language specified")
-                finally:
-                    native_text = args[3]
+        # Translation commands below
 
-                    print(native_text)
-                    print(supported_langs[lang][0:2])
-                    text = trans.translate(supported_langs[lang][0:2], native_text)
-                    trans.speak(supported_langs[lang], text, "female")
+        if command == 'translate':
+            native_text = args[3]
 
-                    voice_client = client.voice_clients[0]
-                    encoded_audio = discord.FFmpegOpusAudio( "./audio_data/temp/output.ogg" )
-                    voice_client.play(encoded_audio)
-                    while voice_client.is_playing():
-                        time.sleep(1)
-                    os.remove( "./audio_data/temp/output.ogg" )
+            print(native_text)
+            print(supported_langs[lang][0:2])
+            text = trans.translate(supported_langs[lang][0:2], native_text)
+            trans.speak(supported_langs[lang], text, "female")
+
+            voice_client = client.voice_clients[0]
+            encoded_audio = discord.FFmpegOpusAudio( "./audio_data/temp/output.ogg" )
+            voice_client.play(encoded_audio)
+            while voice_client.is_playing():
+                time.sleep(1)
+            os.remove( "./audio_data/temp/output.ogg" )
 
 
 
