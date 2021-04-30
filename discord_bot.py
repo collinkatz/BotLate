@@ -119,12 +119,11 @@ async def on_message(message):
             native_text = args[3]
             print("hi")
             print(native_text)
-            print(supported_langs[lang][0:2])
-            text = trans.translate(supported_langs[lang][0:2], native_text)
-            trans.speak(supported_langs[lang], text, "female")
+            text = translator.translate(supported_langs[CONFIG["lang"]][0:2], native_text)
+            translator.speak(supported_langs[CONFIG["lang"]], text, "female")
 
             voice_client = client.voice_clients[0]
-            encoded_audio = discord.FFmpegOpusAudio( "./audio_data/temp/output.ogg" )
+            encoded_audio = discord.FFmpegOpusAudio("./audio_data/temp/output.ogg")
             voice_client.play(encoded_audio)
             while voice_client.is_playing():
                 time.sleep(1)
@@ -155,12 +154,10 @@ async def on_message(message):
 
         if command == '':
             await message.channel.send(README)
-            #TODO: exit method here
-
         else:
             if message.lower() not in quiz_dict.keys():
                 await message.channel.send("Invalid quiz name\n")
-                #TODO: exit method here
+                return
             else:
                 id = quiz_dict[command]
             quiz = cont.get_quiz(id)
@@ -168,6 +165,7 @@ async def on_message(message):
             num_qs = quiz.num_qs()
             for i in range(num_qs):
                 await message.channel.send(quiz.ask())
+                #TODO: have the bot say the question out loud
                 answer = await client.wait_for("message", check=lambda message: message.author == client.user)
                 was_correct, right_answer = quiz.answer(translator, answer)
                 if was_correct:
