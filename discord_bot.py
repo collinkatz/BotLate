@@ -112,6 +112,21 @@ async def on_message(message):
             encoded_audio = discord.FFmpegOpusAudio("./audio_data/output.mp3")
             voice_client.play(encoded_audio)
 
+        if command == 'translate':
+            native_text = args[3]
+            print("hi")
+            print(native_text)
+            print(supported_langs[lang][0:2])
+            text = trans.translate(supported_langs[lang][0:2], native_text)
+            trans.speak(supported_langs[lang], text, "female")
+
+            voice_client = client.voice_clients[0]
+            encoded_audio = discord.FFmpegOpusAudio( "./audio_data/temp/output.ogg" )
+            voice_client.play(encoded_audio)
+            while voice_client.is_playing():
+                time.sleep(1)
+            os.remove( "./audio_data/temp/output.ogg" )
+
     if message.content.startswith('-bl list_quizzes'):
         try:
             channel = message.author.voice.channel
@@ -164,30 +179,6 @@ async def on_message(message):
 
             final_score = quiz.percent()
             await message.channel.send("You got a " + str(final_score) + "%!\n")
-
-
-
-
-
-    if message.content.startswith('-bl leave'):
-        voice_client = client.voice_clients[0]
-        await voice_client.disconnect()
-        # Translation commands below
-
-        if command == 'translate':
-            native_text = args[3]
-            print("hi")
-            print(native_text)
-            print(supported_langs[lang][0:2])
-            text = trans.translate(supported_langs[lang][0:2], native_text)
-            trans.speak(supported_langs[lang], text, "female")
-
-            voice_client = client.voice_clients[0]
-            encoded_audio = discord.FFmpegOpusAudio( "./audio_data/temp/output.ogg" )
-            voice_client.play(encoded_audio)
-            while voice_client.is_playing():
-                time.sleep(1)
-            os.remove( "./audio_data/temp/output.ogg" )
 
 
 
