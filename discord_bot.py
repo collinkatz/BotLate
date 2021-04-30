@@ -1,9 +1,11 @@
 import discord
 from Translator import Translator
 from Content import Content
+import time
 
 
 client = discord.Client()
+README = "TODO\n"
 
 
 @client.event
@@ -18,11 +20,6 @@ def list_quizes():
     # Write this with real code
     return s
 
-def quiz_dict():
-    """A dict that maps a quiz name to its id"""
-    d = {}
-    d["occupations"] = 1
-    return d
 
 @client.event
 async def on_message(message):
@@ -58,7 +55,44 @@ async def on_message(message):
         correct and then the bot can relay that info. If the quiz is done, the score
         shoud be displayed.
         """
-        pass
+        command = message.content.lstrip("-bl quiz")
+        command = command.strip(' ')
+
+        translator = Translator()
+
+        cont = Content(translator)
+        cont.load_quizzes()
+
+        quiz_dict = {}
+        quiz_dict["occupations"] = 1
+        id = None
+
+        if command == '':
+            await message.channel.send(README)
+
+        else:
+            if message.lower() not in quiz_dict.keys():
+                await message.channel.send("Invalid quiz name\n")
+            else:
+                id = quiz_dict[command]
+            quiz = cont.get_quiz(id)
+
+            num_qs = quiz.num_qs()
+            for i in range(num_qs):
+                await message.channel.send(quiz.ask())
+                answer = await client.wait_for("message", check=lambda message: message.author == client.user)
+                was_correct, right_answer = quiz.answer(translator, answer)
+                if was_correct:
+                    await message.channel.send("You got that correct!")
+                else:
+                    await message.channel.send("Unfortunately, that answer was wrong.\n")
+
+            final_score = quiz.percent()
+            await message.channel.send("You got a " + str(final_score) + "%!\n")
+
+
+
+
 
     if message.content.startswith('-bl leave'):
         voice_client = client.voice_clients[0]

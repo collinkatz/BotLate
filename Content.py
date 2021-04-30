@@ -92,6 +92,9 @@ class Quiz():
         """
         return (self.score / len(self.questions)) * 100
 
+    def num_qs(self):
+        return len(self.questions)
+
 
 class Content:
     def __init__(self, translation_obj):
