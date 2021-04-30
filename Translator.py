@@ -86,15 +86,13 @@ class Translator:
         else:
             voice = texttospeech.VoiceSelectionParams(language_code=language, ssml_gender=self.neutral)
 
-        #MP3 encoding, need to test if .WAV will work
-        audio_config = texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEncoding.MP3)
+        #ogg_opus encoding, need to test if .WAV will work
+        audio_config = texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEncoding.OGG_OPUS)
 
         #PERFORM MAGIC
         response = self.speech_client.synthesize_speech(input=voice_input, voice=voice, audio_config=audio_config)
 
-        #TODO: see if this binary data can be directly passed to discord bot
-        #for now, write a .mp3 file
-        with open("audio_data/output.mp3", "wb") as out:
+        with open("audio_data/temp/output.ogg", "wb", 0) as out:
             out.write(response.audio_content)
 
 
