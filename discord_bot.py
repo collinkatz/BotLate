@@ -105,11 +105,11 @@ async def on_message(message):
             if lang not in supported_langs.keys():
                 data = args.pop(0) + " " + data
                 lang = CONFIG["lang"]
-            text = trans.translate(supported_langs[lang][0:2], data)
+            text = translator.translate(supported_langs[lang][0:2], data)
             await say("Your message translated into " + lang + " is:\n```" + text + "```")
             try:
                 voice_client = client.voice_clients[0]
-                trans.speak(supported_langs[lang], text, CONFIG["voice_mode"])
+                translator.speak(supported_langs[lang], text, CONFIG["voice_mode"])
                 encoded_audio = discord.FFmpegOpusAudio( "./audio_data/temp/output.ogg" )
                 voice_client.play(encoded_audio)
                 while voice_client.is_playing():
