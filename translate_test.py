@@ -1,8 +1,20 @@
 from Translator import Translator
+from Conversation import Conversation
 from Content import Content
 from google.cloud import dialogflow
 
 if __name__ == '__main__':
+    trans = Translator()
+    convo = Conversation(trans, "English")
+
+    while not convo.is_done():
+        prompt, hint = convo.ask()
+        print(prompt)
+        print(hint)
+        res = input()
+        print(convo.answer(res))
+
+    """
     trans = Translator()
     session_client = dialogflow.SessionsClient()
     session = session_client.session_path("botlate", 123456)
@@ -18,6 +30,7 @@ if __name__ == '__main__':
     print("Detected intent: ")
     print(response.query_result.intent.display_name)
     print(response.query_result.fulfillment_text)
+    """
 
     """
 

@@ -53,7 +53,7 @@ class Conversation:
     This works by using the Google DialogFlow website to
     create the bot to flexibly respond to a variety of inputs
     """
-    def __init__(self, , trans_obj: Translator, lang):
+    def __init__(self, trans_obj: Translator, lang):
         self.lang = lang
         self.lang_to_code = supported_speech_langs()
         self.situation = "You are walking down the street during the last day of summer break before school \
@@ -73,7 +73,7 @@ class Conversation:
     def send_to_bot(self, txt):
         #sends to bot and returns intent, response
         text_input = dialogflow.TextInput(text=txt, language_code=self.lang_to_code[self.lang])
-        query_input = dialogflow.QueryInput(text=txt)
+        query_input = dialogflow.QueryInput(text=text_input)
 
         response = self.session_client.detect_intent(
             request={"session": self.session, "query_input": query_input}
@@ -107,20 +107,26 @@ class Conversation:
 
     def ask(self):
         #return prompt, hint
-        prompt = self.convo_elems[self.elem_counter].prompt, self.convo_elems[self.elem_counter].get_hint()
-        return self.trans_obj.translate(self.trans_obj.lang_dict_rev[self.lang], prompt)
+        prompt = self.convo_elems[self.elem_counter].prompt
+        hint = self.convo_elems[self.elem_counter].get_hint()
+
+        new_prompt = self.trans_obj.translate(self.trans_obj.lang_dict_rev[self.lang], prompt)
+        new_hint = self.trans_obj.translate(self.trans_obj.lang_dict_rev[self.lang], hint)
+
+        return new_prompt, new_hint
 
     def answer(self, user_in):
         #increment counter and return a text
-        self.elem_counter += 1
         #check if the expected bot intent is correct
         intent, bot_res = self.send_to_bot(user_in)
 
         if intent == self.convo_elems[self.elem_counter].intent:
             ret = self.convo_elems[self.elem_counter].process_answer(bot_res)
+            self.elem_counter += 1
             return self.trans_obj.translate(self.trans_obj.lang_dict_rev[self.lang], ret)
         else:
             ret = "Not quite what we were looking for"
+            self.elem_counter += 1
             return self.trans_obj.translate(self.trans_obj.lang_dict_rev[self.lang], ret)
 
     def is_done(self):
