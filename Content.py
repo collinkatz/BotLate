@@ -97,19 +97,20 @@ class Quiz():
 
 
 class Content:
-    def __init__(self, translation_obj):
+    def __init__(self, translation_obj: Translator, language):
         self.translation_obj = translation_obj
         self.quizzes = []
         self.scenarios = []
+        self.language = language #full name eg. Spanish"
         self.load_quizzes()
 
     def load_quizzes(self):
         """Used to load quizzes"""
         #Quiz for Occupation
-        occ_quiz = self.load_occupation_quiz()
+        occ_quiz = self.load_occupation_quiz(self.language)
         self.quizzes.append(occ_quiz)
 
-    def load_occupation_quiz(self):
+    def load_occupation_quiz(self, target_lang):
         q1 = Question("This person plays roles in a movie.")
         q1.set_ans(["Actor", "Actress", "The actor"])
 
@@ -120,7 +121,9 @@ class Content:
 
         qs = [q1, q2]
 
-        occ_quiz = Quiz("Occupation", 1, qs, "es")
+        #Get languge code
+
+        occ_quiz = Quiz("Occupation", 1, qs, self.translation_obj.lang_dict_rev[target_lang])
         occ_quiz.translation_obj = self.translation_obj
 
         return occ_quiz

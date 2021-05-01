@@ -15,7 +15,7 @@ if __name__ == '__main__':
     #trans.speak("es-ES", text, "female")
 
     #testing a quiz
-    cont = Content(trans)
+    cont = Content(trans, "Spanish")
     cont.load_quizzes()
     occ_quiz = cont.get_quiz(1)
 

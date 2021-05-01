@@ -5,8 +5,8 @@ import time
 import os
 import time
 
-trans = Translator()
-supported_langs = trans.speech_langs
+translator = Translator()
+supported_langs = translator.speech_langs
 client = discord.Client()
 README = "TODO\n"
 
@@ -74,6 +74,7 @@ async def connect_vc(message):
     except discord.errors.ClientException:
         await message.channel.send("I'm already connected to a channel!")
 
+
 @client.event
 async def on_message(message):
 
@@ -85,6 +86,7 @@ async def on_message(message):
 
     if message.content.startswith(COMMAND_PREFIX): # If a user has entered a command
         command, args, data = parse_command_args(message)
+        print("command: ", command, "args: ", args, "data: ", data)
 
         if command == "join":
             await connect_vc(message)
@@ -138,23 +140,16 @@ async def on_message(message):
         command = message.content.lstrip("-bl quiz")
         command = command.strip(' ')
 
-        translator = Translator()
-
-        cont = Content(translator)
-        cont.load_quizzes()
-
         quiz_dict = {}
         quiz_dict["occupations"] = 1
         id = None
 
         if command == '':
             await message.channel.send(README)
-            #TODO: exit method here
-
         else:
             if message.lower() not in quiz_dict.keys():
                 await message.channel.send("Invalid quiz name\n")
-                #TODO: exit method here
+                return
             else:
                 id = quiz_dict[command]
             quiz = cont.get_quiz(id)
@@ -162,6 +157,7 @@ async def on_message(message):
             num_qs = quiz.num_qs()
             for i in range(num_qs):
                 await message.channel.send(quiz.ask())
+                #TODO: have the bot say the question out loud
                 answer = await client.wait_for("message", check=lambda message: message.author == client.user)
                 was_correct, right_answer = quiz.answer(translator, answer)
                 if was_correct:
