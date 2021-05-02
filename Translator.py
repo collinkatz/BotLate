@@ -68,7 +68,7 @@ class Translator:
         """
         Generates a .mp3 audio file based on the input language code
         (ex. en-US) and text (ex. I love coding).
-        :param language: google text-to-speech language code (differnet from translate API)
+        :param language: google text-to-speech language code (different from translate API)
         :param text: the raw text to speak
         :param gender: neutral, male, or female
         :return: None
