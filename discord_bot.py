@@ -12,7 +12,9 @@ README = "TODO\n"
 
 COMMAND_PREFIX = '-bl'
 CONFIG = {"lang": "Spanish", "voice_mode": "female"}
-COMMANDS = {COMMAND_PREFIX: 0, 'join': 0, 'leave': 0, 'play': 0, 'translate': 1}
+COMMANDS = {COMMAND_PREFIX: 0, 'join': 0, 'leave': 0, 'play': 0, 'translate': 1, 'list_quizzes': 0, 'quiz': 1}
+
+Content = Content(translator, CONFIG["lang"])
 
 
 def parse_command_args(message):
@@ -23,7 +25,7 @@ def parse_command_args(message):
     arg_list, A list of strings representing the arguments passed by the user based on the number of arguments in COMMANDS,
     data, A string: the data after the arguments passed by the user
     """
-    args = str(message.content).split(" ")
+    args = str(message.content).strip().lower().split(" ")
     arg_list = []
     args.pop(0) # removes command prefix
     command = args.pop(0)  # second arg in args is always command
@@ -44,11 +46,25 @@ async def on_ready():
 def list_quizes():
     """Returns a string of available quizzes"""
     s = ""
-    s += "Usage: -bl quiz occupations\n"
+    s += "To take a quiz, do -bl quiz [Name of Quiz] example: -bl quiz occupations\n"
+    s += "``` Quiz List:\n"
     s += "1) Occupations\n"
+    s += "```"
     # Write this with real code
     return s
 
+
+async def talk(text):
+    try:
+        voice_client = client.voice_clients[0]
+        translator.speak("en-US", text, CONFIG["voice_mode"])
+        encoded_audio = discord.FFmpegOpusAudio("./audio_data/temp/output.ogg")
+        voice_client.play(encoded_audio)
+        while voice_client.is_playing():
+            time.sleep(1)
+        os.remove("./audio_data/temp/output.ogg")
+    except IndexError:
+        print("Voice client not connected, translating without audio")
 
 async def disconnect_vc(connected_voice_client):
     """
@@ -72,7 +88,9 @@ async def connect_vc(message):
         channel = message.author.voice.channel
         return await channel.connect()
     except discord.errors.ClientException:
-        await message.channel.send("I'm already connected to a channel!")
+        print("Bot already connected to a channel")
+    except AttributeError:
+        print("User not connected to a channel")
 
 
 @client.event
@@ -91,16 +109,16 @@ async def on_message(message):
         if command == "join":
             await connect_vc(message)
 
-        if command == 'leave':
+        elif command == 'leave':
             voice_client = client.voice_clients[0]
             await disconnect_vc(voice_client)
 
-        if command == 'play':
+        elif command == 'play':
             voice_client = client.voice_clients[0]
             encoded_audio = discord.FFmpegOpusAudio("./audio_data/output.mp3")
             voice_client.play(encoded_audio)
 
-        if command == 'translate':
+        elif command == 'translate':
             lang = args[0]
             if lang not in supported_langs.keys():
                 data = args.pop(0) + " " + data
@@ -121,53 +139,46 @@ async def on_message(message):
         # TODO: Command to output config
         # TODO: Command to update config
 
-    if message.content.startswith('-bl list_quizzes'):
-        try:
-            channel = message.author.voice.channel
-            voice_channel = await channel.connect()
-        except discord.errors.ClientException:
-            await message.channel.send(list_quizes())
+        elif command == 'list_quizzes':
+            await connect_vc(message)
+            await say(list_quizes())
 
-    if message.content.startswith('-bl quiz'):
-        """
-        Allows the user to take a quiz. Needs to get the quiz name,
-        then the id from a dict. Then, create a Content object, and then get
-        the specific Quiz. Then, the bot should speak verbally the question
-        and allow the user the type to answer. The Quiz object will tell if its
-        correct and then the bot can relay that info. If the quiz is done, the score
-        shoud be displayed.
-        """
-        command = message.content.lstrip("-bl quiz")
-        command = command.strip(' ')
+        elif command == 'quiz':
+            """
+            Allows the user to take a quiz. Needs to get the quiz name,
+            then the id from a dict. Then, create a Content object, and then get
+            the specific Quiz. Then, the bot should speak verbally the question
+            and allow the user the type to answer. The Quiz object will tell if its
+            correct and then the bot can relay that info. If the quiz is done, the score
+            shoud be displayed.
+            """
 
-        quiz_dict = {}
-        quiz_dict["occupations"] = 1
-        id = None
+            quiz_dict = {}
+            quiz_dict["occupations"] = 1
+            id = None
 
-        if command == '':
-            await message.channel.send(README)
-        else:
-            if message.lower() not in quiz_dict.keys():
-                await message.channel.send("Invalid quiz name\n")
+            if args[0] not in quiz_dict.keys():
+                await say("Sorry, I don't have that quiz :(\n")
                 return
             else:
-                id = quiz_dict[command]
-            quiz = cont.get_quiz(id)
+                id = quiz_dict[args[0]]
+            quiz = Content.get_quiz(id)
 
             num_qs = quiz.num_qs()
             for i in range(num_qs):
-                await message.channel.send(quiz.ask())
+                await say(quiz.ask())
                 #TODO: have the bot say the question out loud
-                answer = await client.wait_for("message", check=lambda message: message.author == client.user)
-                was_correct, right_answer = quiz.answer(translator, answer)
+                answer = await client.wait_for("message", timeout=60)
+                was_correct, right_answer = quiz.answer(translator, answer.content)
                 if was_correct:
-                    await message.channel.send("You got that correct!")
+                    await say("You got that correct!")
                 else:
-                    await message.channel.send("Unfortunately, that answer was wrong.\n")
+                    await say("Unfortunately, that answer was wrong.\n")
 
             final_score = quiz.percent()
-            await message.channel.send("You got a " + str(final_score) + "%!\n")
+            await say("You got a " + str(final_score) + "%!\n")
+            quiz.reset()
 
 
 
-client.run('ODM2ODAyNjAwMjg0MDYxNzA1.YIjTJg.NH1Y0Ki3Hxx82uQZH9Wv44yiVfI')
+client.run('ODM2ODAyNjAwMjg0MDYxNzA1.YIjTJg.QyT9gAK6eLW2WROE1b7fKea2qbw')
