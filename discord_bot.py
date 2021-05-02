@@ -12,7 +12,7 @@ README = "TODO\n"
 
 COMMAND_PREFIX = '-bl'
 CONFIG = {"lang": "Spanish", "voice_mode": "female"}
-COMMANDS = {COMMAND_PREFIX: 0, 'join': 0, 'leave': 0, 'play': 0, 'translate': 1, 'list_quizzes': 0, 'quiz': 1}
+COMMANDS = {COMMAND_PREFIX: 0, 'join': 0, 'leave': 0, 'play': 0, 'translate': 1, 'list_quizzes': 0, 'quiz': 1, 'help': 0, '?': 0} # A dictionary of commands and the number of arguments taken by each command
 
 Content = Content(translator, CONFIG["lang"])
 
@@ -55,9 +55,22 @@ def list_quizes():
 
 
 async def talk(text):
+    """
+    Outputs audio to the discord bot in the detected language of the input text
+    :param text: A string, the message to say in any supported language
+    :return: None
+    """
     try:
+        message_in_english = translator.translate("en", text)
+        print(translator.detected_lang)
+        detected_lang_code = ""
+        for lang_code in supported_langs.values():
+            if lang_code[0:2] == translator.detected_lang:
+                detected_lang_code = lang_code
+                break
+        print(detected_lang_code)
         voice_client = client.voice_clients[0]
-        translator.speak("en-US", text, CONFIG["voice_mode"])
+        translator.speak(detected_lang_code, text, CONFIG["voice_mode"])
         encoded_audio = discord.FFmpegOpusAudio("./audio_data/temp/output.ogg")
         voice_client.play(encoded_audio)
         while voice_client.is_playing():
@@ -138,6 +151,13 @@ async def on_message(message):
 
         # TODO: Command to output config
         # TODO: Command to update config
+        elif command == 'help' or command == '?':
+            file_object = open("./command_list.txt", "r")
+            s = "List of possible commands:\n```"
+            for line in file_object:
+                s += line
+            s += "```"
+            await say(s)
 
         elif command == 'list_quizzes':
             await connect_vc(message)
@@ -166,8 +186,9 @@ async def on_message(message):
 
             num_qs = quiz.num_qs()
             for i in range(num_qs):
-                await say(quiz.ask())
-                #TODO: have the bot say the question out loud
+                question = quiz.ask()
+                await say(question)
+                await talk(question)
                 answer = await client.wait_for("message", timeout=60)
                 was_correct, right_answer = quiz.answer(translator, answer.content)
                 if was_correct:

@@ -1,0 +1,8 @@
+-bl help | ?: displays a list of bot commands
+-bl config: displays the bot's current configuration
+-bl update_config [setting you want to change] [value to change setting to]: changes a bot config setting
+-bl join: Joins the bot into your voice channel. Some bot functions can output translated audio to help you learn pronunciation.
+-bl leave: Disconnects the bot from your voice channel.
+-bl translate [optional: language to translate into] [message to translate]: Translates a message into another language. This function can output translated audio.
+-bl list_quizzes: Lists all available quizzes that you can take
+-bl quiz [quiz you want to take]: Lets you take a quiz in the language you have indicated in your bot config.
