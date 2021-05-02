@@ -48,7 +48,7 @@ class Quiz():
         Asks a question, and must call answer() after
         :return: The question as a string in English
         """
-        return self.questions[self.q_counter].question
+        return str(self.q_counter + 1) + ") " + self.translation_obj.translate(self.target_language, self.questions[self.q_counter].question )
 
     def check_right(self, ans_text):
         """
